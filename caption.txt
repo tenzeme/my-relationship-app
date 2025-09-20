@@ -1,0 +1,881 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RelationshipMind - Relationship Journaling</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 10px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+            padding: 20px;
+            text-align: center;
+            color: white;
+        }
+
+        .header h1 {
+            font-size: 2em;
+            margin-bottom: 10px;
+            font-weight: 300;
+        }
+
+        .header p {
+            font-size: 1em;
+            opacity: 0.9;
+        }
+
+        .main-content {
+            padding: 20px;
+        }
+
+        .tabs {
+            display: flex;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+
+        .tab-btn {
+            flex: 1;
+            padding: 15px;
+            border: none;
+            background: none;
+            cursor: pointer;
+            font-size: 16px;
+            color: #666;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s ease;
+        }
+
+        .tab-btn.active {
+            color: #667eea;
+            border-bottom-color: #667eea;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .people-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .person-card {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            padding: 20px;
+            border-radius: 15px;
+            color: white;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+            position: relative;
+        }
+
+        .person-card:hover {
+            transform: translateY(-3px);
+        }
+
+        .person-name {
+            font-size: 1.2em;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .person-type {
+            opacity: 0.8;
+            margin-bottom: 10px;
+        }
+
+        .person-stats {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.9em;
+        }
+
+        .add-person-btn {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 20px;
+            border-radius: 15px;
+            cursor: pointer;
+            width: 100%;
+            margin-bottom: 20px;
+            font-size: 18px;
+            transition: transform 0.3s ease;
+        }
+
+        .add-person-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .person-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        .modal-content {
+            background: white;
+            max-width: 600px;
+            margin: 50px auto;
+            border-radius: 15px;
+            padding: 30px;
+            position: relative;
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #555;
+            font-weight: 500;
+        }
+
+        input, textarea, select {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: border-color 0.3s ease;
+        }
+
+        input:focus, textarea:focus, select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        .emotion-selector {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .emotion-btn {
+            padding: 8px 15px;
+            border: 2px solid #e0e0e0;
+            background: white;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 14px;
+        }
+
+        .emotion-btn:hover {
+            border-color: #667eea;
+            background: #f0f4ff;
+        }
+
+        .emotion-btn.active {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+
+        .save-btn {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 10px;
+            font-size: 16px;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 10px;
+        }
+
+        .ai-insights {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            padding: 20px;
+            border-radius: 15px;
+            margin-top: 20px;
+            color: white;
+            display: none;
+        }
+
+        .insight-card {
+            background: rgba(255,255,255,0.2);
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            backdrop-filter: blur(10px);
+        }
+
+        .book-reference {
+            background: rgba(255,255,255,0.3);
+            padding: 10px;
+            border-radius: 8px;
+            margin-top: 10px;
+            font-style: italic;
+            font-size: 0.9em;
+        }
+
+        .journal-entries {
+            margin-top: 20px;
+        }
+
+        .entry-item {
+            background: #f8f9ff;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            border-left: 4px solid #667eea;
+        }
+
+        .entry-date {
+            color: #667eea;
+            font-weight: bold;
+            margin-bottom: 5px;
+            font-size: 0.9em;
+        }
+
+        .person-details {
+            display: none;
+            padding: 20px;
+            background: #f8f9ff;
+            border-radius: 15px;
+            margin-bottom: 20px;
+        }
+
+        .detail-item {
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .detail-label {
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 5px;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                margin: 5px;
+                border-radius: 15px;
+            }
+            
+            .header {
+                padding: 15px;
+            }
+            
+            .main-content {
+                padding: 15px;
+            }
+            
+            .people-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .tabs {
+                font-size: 14px;
+            }
+            
+            .tab-btn {
+                padding: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>RelationshipMind</h1>
+            <p>AI-Powered Relationship Psychology</p>
+        </div>
+
+        <div class="main-content">
+            <div class="tabs">
+                <button class="tab-btn active" onclick="showTab('people')">People</button>
+                <button class="tab-btn" onclick="showTab('journal')">Journal</button>
+                <button class="tab-btn" onclick="showTab('insights')">Insights</button>
+            </div>
+
+            <!-- People Tab -->
+            <div class="tab-content active" id="people-tab">
+                <button class="add-person-btn" onclick="openPersonModal()">+ Add New Person</button>
+                <div class="people-grid" id="people-grid">
+                    <!-- People cards will be added here dynamically -->
+                </div>
+            </div>
+
+            <!-- Journal Tab -->
+            <div class="tab-content" id="journal-tab">
+                <div id="selected-person-info" class="person-details">
+                    <h3>Select a person to journal about</h3>
+                </div>
+
+                <div class="form-group">
+                    <label for="person-select">Choose Person:</label>
+                    <select id="person-select" onchange="selectPerson()">
+                        <option value="">Select a person...</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>How are you feeling about this person today?</label>
+                    <div class="emotion-selector">
+                        <button class="emotion-btn" data-emotion="happy">😊 Happy</button>
+                        <button class="emotion-btn" data-emotion="frustrated">😤 Frustrated</button>
+                        <button class="emotion-btn" data-emotion="confused">😕 Confused</button>
+                        <button class="emotion-btn" data-emotion="grateful">🙏 Grateful</button>
+                        <button class="emotion-btn" data-emotion="anxious">😰 Anxious</button>
+                        <button class="emotion-btn" data-emotion="loved">🥰 Loved</button>
+                        <button class="emotion-btn" data-emotion="disappointed">😞 Disappointed</button>
+                        <button class="emotion-btn" data-emotion="curious">🤔 Curious</button>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="situation">What happened today?</label>
+                    <textarea id="situation" placeholder="Describe the situation or interaction..."></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="thoughts">Your thoughts and reactions:</label>
+                    <textarea id="thoughts" placeholder="What went through your mind? How did you react?"></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="patterns">Patterns you notice:</label>
+                    <textarea id="patterns" placeholder="Any recurring themes or behaviors?"></textarea>
+                </div>
+
+                <button class="save-btn" onclick="saveJournalEntry()">Save Entry & Get AI Insights</button>
+
+                <div class="ai-insights" id="ai-insights">
+                    <h3>🧠 Psychology Insights</h3>
+                    <div id="insights-content"></div>
+                </div>
+            </div>
+
+            <!-- Insights Tab -->
+            <div class="tab-content" id="insights-tab">
+                <h3>📊 Relationship Patterns & Insights</h3>
+                <div id="overall-insights">
+                    <p>Journal about people to unlock relationship insights!</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add/Edit Person Modal -->
+    <div class="person-modal" id="person-modal">
+        <div class="modal-content">
+            <button class="close-btn" onclick="closePersonModal()">&times;</button>
+            <h3 id="modal-title">Add New Person</h3>
+            
+            <div class="form-group">
+                <label for="person-name">Name:</label>
+                <input type="text" id="person-name" placeholder="Person's name">
+            </div>
+
+            <div class="form-group">
+                <label for="relationship-type">Relationship Type:</label>
+                <select id="relationship-type">
+                    <option value="romantic">Romantic Partner</option>
+                    <option value="family">Family Member</option>
+                    <option value="friend">Friend</option>
+                    <option value="colleague">Colleague</option>
+                    <option value="acquaintance">Acquaintance</option>
+                    <option value="other">Other</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="person-age">Age (optional):</label>
+                <input type="number" id="person-age" placeholder="Their age">
+            </div>
+
+            <div class="form-group">
+                <label for="personality-type">Personality Notes:</label>
+                <textarea id="personality-type" placeholder="What's their personality like? Introverted/extroverted? Communication style?"></textarea>
+            </div>
+
+            <div class="form-group">
+                <label for="relationship-context">How you know them:</label>
+                <textarea id="relationship-context" placeholder="Where did you meet? How long have you known them?"></textarea>
+            </div>
+
+            <div class="form-group">
+                <label for="current-dynamics">Current relationship dynamics:</label>
+                <textarea id="current-dynamics" placeholder="How is the relationship currently? Any challenges or positive aspects?"></textarea>
+            </div>
+
+            <div class="form-group">
+                <label for="goals">Your goals with this person:</label>
+                <textarea id="goals" placeholder="What would you like to improve or maintain in this relationship?"></textarea>
+            </div>
+
+            <button class="save-btn" onclick="savePerson()">Save Person</button>
+        </div>
+    </div>
+
+    <script>
+        let people = JSON.parse(localStorage.getItem('relationshipPeople')) || [];
+        let currentPersonId = null;
+
+        // Initialize the app
+        window.addEventListener('load', function() {
+            renderPeople();
+            updatePersonSelect();
+        });
+
+        // Tab functionality
+        function showTab(tabName) {
+            document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            
+            document.getElementById(tabName + '-tab').classList.add('active');
+            event.target.classList.add('active');
+        }
+
+        // Person management
+        function openPersonModal(personId = null) {
+            const modal = document.getElementById('person-modal');
+            const title = document.getElementById('modal-title');
+            
+            if (personId) {
+                const person = people.find(p => p.id === personId);
+                title.textContent = 'Edit Person';
+                document.getElementById('person-name').value = person.name;
+                document.getElementById('relationship-type').value = person.type;
+                document.getElementById('person-age').value = person.age || '';
+                document.getElementById('personality-type').value = person.personality || '';
+                document.getElementById('relationship-context').value = person.context || '';
+                document.getElementById('current-dynamics').value = person.dynamics || '';
+                document.getElementById('goals').value = person.goals || '';
+                currentPersonId = personId;
+            } else {
+                title.textContent = 'Add New Person';
+                clearPersonForm();
+                currentPersonId = null;
+            }
+            
+            modal.style.display = 'block';
+        }
+
+        function closePersonModal() {
+            document.getElementById('person-modal').style.display = 'none';
+            clearPersonForm();
+        }
+
+        function clearPersonForm() {
+            document.getElementById('person-name').value = '';
+            document.getElementById('relationship-type').value = 'romantic';
+            document.getElementById('person-age').value = '';
+            document.getElementById('personality-type').value = '';
+            document.getElementById('relationship-context').value = '';
+            document.getElementById('current-dynamics').value = '';
+            document.getElementById('goals').value = '';
+        }
+
+        function savePerson() {
+            const name = document.getElementById('person-name').value;
+            const type = document.getElementById('relationship-type').value;
+            const age = document.getElementById('person-age').value;
+            const personality = document.getElementById('personality-type').value;
+            const context = document.getElementById('relationship-context').value;
+            const dynamics = document.getElementById('current-dynamics').value;
+            const goals = document.getElementById('goals').value;
+
+            if (!name) {
+                alert('Please enter a name');
+                return;
+            }
+
+            const personData = {
+                id: currentPersonId || Date.now().toString(),
+                name: name,
+                type: type,
+                age: age,
+                personality: personality,
+                context: context,
+                dynamics: dynamics,
+                goals: goals,
+                entries: currentPersonId ? people.find(p => p.id === currentPersonId).entries || [] : [],
+                createdAt: currentPersonId ? people.find(p => p.id === currentPersonId).createdAt : new Date().toISOString()
+            };
+
+            if (currentPersonId) {
+                const index = people.findIndex(p => p.id === currentPersonId);
+                people[index] = personData;
+            } else {
+                people.push(personData);
+            }
+
+            localStorage.setItem('relationshipPeople', JSON.stringify(people));
+            renderPeople();
+            updatePersonSelect();
+            closePersonModal();
+        }
+
+        function renderPeople() {
+            const grid = document.getElementById('people-grid');
+            grid.innerHTML = '';
+
+            people.forEach(person => {
+                const card = document.createElement('div');
+                card.className = 'person-card';
+                card.onclick = () => openPersonModal(person.id);
+                
+                card.innerHTML = `
+                    <div class="person-name">${person.name}</div>
+                    <div class="person-type">${person.type}</div>
+                    <div class="person-stats">
+                        <span>${person.entries ? person.entries.length : 0} entries</span>
+                        <span>${person.age ? person.age + ' yrs' : ''}</span>
+                    </div>
+                `;
+                
+                grid.appendChild(card);
+            });
+        }
+
+        function updatePersonSelect() {
+            const select = document.getElementById('person-select');
+            select.innerHTML = '<option value="">Select a person...</option>';
+            
+            people.forEach(person => {
+                const option = document.createElement('option');
+                option.value = person.id;
+                option.textContent = `${person.name} (${person.type})`;
+                select.appendChild(option);
+            });
+        }
+
+        function selectPerson() {
+            const personId = document.getElementById('person-select').value;
+            const personInfo = document.getElementById('selected-person-info');
+            
+            if (personId) {
+                const person = people.find(p => p.id === personId);
+                personInfo.style.display = 'block';
+                personInfo.innerHTML = `
+                    <h3>${person.name}</h3>
+                    <div class="detail-item">
+                        <div class="detail-label">Relationship:</div>
+                        <div>${person.type}</div>
+                    </div>
+                    ${person.age ? `
+                    <div class="detail-item">
+                        <div class="detail-label">Age:</div>
+                        <div>${person.age} years old</div>
+                    </div>` : ''}
+                    ${person.personality ? `
+                    <div class="detail-item">
+                        <div class="detail-label">Personality:</div>
+                        <div>${person.personality}</div>
+                    </div>` : ''}
+                    ${person.goals ? `
+                    <div class="detail-item">
+                        <div class="detail-label">Your Goals:</div>
+                        <div>${person.goals}</div>
+                    </div>` : ''}
+                `;
+            } else {
+                personInfo.style.display = 'none';
+            }
+        }
+
+        // Journal functionality
+        document.querySelectorAll('.emotion-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                document.querySelectorAll('.emotion-btn').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+            });
+        });
+
+        function saveJournalEntry() {
+            const personId = document.getElementById('person-select').value;
+            const emotion = document.querySelector('.emotion-btn.active')?.getAttribute('data-emotion');
+            const situation = document.getElementById('situation').value;
+            const thoughts = document.getElementById('thoughts').value;
+            const patterns = document.getElementById('patterns').value;
+
+            if (!personId) {
+                alert('Please select a person first');
+                return;
+            }
+
+            if (!situation && !thoughts) {
+                alert('Please describe the situation or your thoughts');
+                return;
+            }
+
+            const person = people.find(p => p.id === personId);
+            const entry = {
+                id: Date.now().toString(),
+                emotion: emotion,
+                situation: situation,
+                thoughts: thoughts,
+                patterns: patterns,
+                timestamp: new Date().toISOString()
+            };
+
+            if (!person.entries) person.entries = [];
+            person.entries.unshift(entry);
+
+            localStorage.setItem('relationshipPeople', JSON.stringify(people));
+
+            // Generate AI insights
+            generatePersonalizedInsights(person, entry);
+
+            // Clear form
+            document.getElementById('situation').value = '';
+            document.getElementById('thoughts').value = '';
+            document.getElementById('patterns').value = '';
+            document.querySelectorAll('.emotion-btn').forEach(b => b.classList.remove('active'));
+
+            renderPeople();
+        }
+
+        function generatePersonalizedInsights(person, entry) {
+            const insightsSection = document.getElementById('ai-insights');
+            const insightsContent = document.getElementById('insights-content');
+            
+            insightsSection.style.display = 'block';
+            insightsContent.innerHTML = 'Analyzing your relationship dynamics...';
+
+            setTimeout(() => {
+                const insights = getAdvancedInsights(person, entry);
+                insightsContent.innerHTML = insights;
+            }, 2000);
+        }
+
+        function getAdvancedInsights(person, entry) {
+            let insights = '';
+
+            // Emotion-based insights with specific book concepts
+            if (entry.emotion === 'frustrated') {
+                insights += `
+                    <div class="insight-card">
+                        <h4>🎯 The Frustration Code with ${person.name}</h4>
+                        <p><strong>What's Really Happening:</strong> Your frustration is a signal that ${person.name} is triggering one of your core values or needs.</p>
+                        <div class="book-reference">
+                            📚 <strong>"The Laws of Human Nature" - Law of Irrationality:</strong><br>
+                            • We get most frustrated when people violate our internal "shoulds"<br>
+                            • ${person.name} likely has different priorities or values than you expect<br>
+                            <strong>Action:</strong> Instead of thinking "${person.name} should do X", ask "What does ${person.name} value that makes them act this way?"
+                        </div>
+                    </div>
+                `;
+            } else if (entry.emotion === 'confused') {
+                insights += `
+                    <div class="insight-card">
+                        <h4>🤔 Decoding ${person.name}'s Mixed Signals</h4>
+                        <p><strong>Pattern Recognition:</strong> Confusion usually means ${person.name} is operating from a different emotional or communication system than you.</p>
+                        <div class="book-reference">
+                            📚 <strong>"Men Are from Mars, Women Are from Venus" - Core Concept:</strong><br>
+                            • When stressed, people retreat to their "home planet" behavior<br>
+                            • Mars: Withdraws to solve problems alone<br>
+                            • Venus: Talks through feelings to process<br>
+                            <strong>Try This:</strong> Ask "${person.name}, what would help you feel better right now?" instead of trying to fix or understand immediately.
+                        </div>
+                    </div>
+                `;
+            } else if (entry.emotion === 'grateful') {
+                insights += `
+                    <div class="insight-card">
+                        <h4>💝 Amplifying Gratitude with ${person.name}</h4>
+                        <p><strong>Psychology Insight:</strong> Your gratitude indicates ${person.name} is meeting one of your core emotional needs.</p>
+                        <div class="book-reference">
+                            📚 <strong>"The Laws of Human Nature" - Law of the Ideal Self:</strong><br>
+                            • When people feel appreciated for their authentic qualities, they become more of those qualities<br>
+                            • Specific appreciation is 10x more powerful than general praise<br>
+                            <strong>Power Move:</strong> Tell ${person.name}: "When you [specific behavior], it makes me feel [specific emotion] because [specific reason]."
+                        </div>
+                    </div>
+                `;
+            } else if (entry.emotion === 'anxious') {
+                insights += `
+                    <div class="insight-card">
+                        <h4>😰 Anxiety Analysis with ${person.name}</h4>
+                        <p><strong>Root Cause:</strong> Relationship anxiety usually stems from uncertainty about where you stand with someone.</p>
+                        <div class="book-reference">
+                            📚 <strong>"Surrounded by Idiots" - DISC Personality Types:</strong><br>
+                            • Red (Dominant): Direct communication reduces their anxiety<br>
+                            • Yellow (Influential): Social validation reduces their anxiety<br>
+                            • Green (Steady): Consistency and security reduce their anxiety<br>
+                            • Blue (Analytical): Clear information and logic reduce their anxiety<br>
+                            <strong>Question:</strong> Which type might ${person.name} be? Adjust your approach accordingly.
+                        </div>
+                    </div>
+                `;
+            }
+
+            // Relationship type specific insights with actionable frameworks
+            if (person.type === 'romantic') {
+                insights += `
+                    <div class="insight-card">
+                        <h4>❤️ Romantic Relationship Decoder</h4>
+                        <p><strong>Mars/Venus Analysis:</strong> Understanding ${person.name}'s emotional language prevents 80% of relationship conflicts.</p>
+                        <div class="book-reference">
+                            📚 <strong>"Men Are from Mars, Women Are from Venus" - Specific Strategies:</strong><br>
+                            • <strong>If ${person.name} seems distant:</strong> They might need space to process (Mars style) - don't take it personally<br>
+                            • <strong>If ${person.name} seems emotional:</strong> Listen without trying to fix (Venus needs to feel heard first)<br>
+                            • <strong>Love Tank Concept:</strong> Everyone has different ways of feeling loved - discover ${person.name}'s primary love language<br>
+                            <strong>This Week:</strong> Ask "${person.name}, what makes you feel most loved by me?"
+                        </div>
+                    </div>
+                `;
+            } else if (person.type === 'family') {
+                insights += `
+                    <div class="insight-card">
+                        <h4>👨‍👩‍👧‍👦 Family Psychology Patterns</h4>
+                        <p><strong>Generational Dynamics:</strong> Your relationship with ${person.name} is shaped by invisible family rules and roles.</p>
+                        <div class="book-reference">
+                            📚 <strong>"The Laws of Human Nature" - Law of Generational Myopia:</strong><br>
+                            • Everyone is shaped by the era they grew up in<br>
+                            • ${person.name}'s values were formed by different experiences than yours<br>
+                            • Family conflicts often happen when we expect others to share our generational values<br>
+                            <strong>Breakthrough Question:</strong> "What was important to people when ${person.name} was growing up that might explain their perspective?"
+                        </div>
+                    </div>
+                `;
+            } else if (person.type === 'colleague') {
+                insights += `
+                    <div class="insight-card">
+                        <h4>💼 Workplace Psychology with ${person.name}</h4>
+                        <p><strong>Professional Dynamics:</strong> Work relationships are driven by different motivations than personal ones.</p>
+                        <div class="book-reference">
+                            📚 <strong>"Surrounded by Idiots" - Workplace Communication:</strong><br>
+                            • <strong>Red Types:</strong> Want results and efficiency - be direct and solution-focused with ${person.name}<br>
+                            • <strong>Yellow Types:</strong> Want recognition and fun - acknowledge their contributions publicly<br>
+                            • <strong>Green Types:</strong> Want harmony and teamwork - involve them in decisions<br>
+                            • <strong>Blue Types:</strong> Want accuracy and quality - give them data and time to analyze<br>
+                            <strong>Observe:</strong> Which communication style does ${person.name} respond to best?
+                        </div>
+                    </div>
+                `;
+            }
+
+            // Specific action plan based on person's profile
+            insights += `
+                <div class="insight-card">
+                    <h4>🎯 Your Personal Action Plan</h4>
+                    <p><strong>Based on ${person.name}'s profile and today's interaction:</strong></p>
+                    <div style="margin-top: 15px;">
+            `;
+
+            // Personality-based suggestions
+            if (person.personality && person.personality.toLowerCase().includes('introvert')) {
+                insights += `
+                    <div style="margin-bottom: 10px;">
+                        <strong>🧠 Introversion Strategy:</strong> ${person.name} processes internally first. Give them time to think before expecting responses. Text important topics beforehand so they can prepare their thoughts.
+                    </div>
+                `;
+            }
+            if (person.personality && person.personality.toLowerCase().includes('extrovert')) {
+                insights += `
+                    <div style="margin-bottom: 10px;">
+                        <strong>🗣️ Extroversion Strategy:</strong> ${person.name} thinks out loud. Let them talk through their thoughts without interrupting. They often don't know what they think until they say it.
+                    </div>
+                `;
+            }
+
+            // Goal-based suggestions
+            if (person.goals) {
+                insights += `
+                    <div style="margin-bottom: 10px;">
+                        <strong>🎯 Goal Alignment:</strong> Your goal is "${person.goals.substring(0, 100)}..." Focus your next interaction on this specific outcome.
+                    </div>
+                `;
+            }
+
+            // Universal principles from the books
+            insights += `
+                    <div style="margin-bottom: 10px;">
+                        <strong>📖 Universal Principle:</strong> "The Laws of Human Nature" teaches that everyone has a deep need to feel understood. Your next conversation should focus 70% on understanding ${person.name} and 30% on being understood.
+                    </div>
+                    <div style="margin-bottom: 10px;">
+                        <strong>🔬 Practical Test:</strong> Try mirroring ${person.name}'s communication style. If they speak fast, match their pace. If they're detail-oriented, give details. This creates instant rapport.
+                    </div>
+                </div>
+            `;
+
+            // Next steps with specific book chapters
+            insights += `
+                <div class="insight-card">
+                    <h4>📚 Your Next Reading Assignment</h4>
+                    <p>Based on your situation with ${person.name}:</p>
+            `;
+
+            if (entry.emotion === 'frustrated' || entry.emotion === 'confused') {
+                insights += `<strong>Read This Week:</strong> "The Laws of Human Nature" - Chapter 1 (Master Your Emotional Self) and Chapter 4 (See Through People's Masks)`;
+            } else if (person.type === 'romantic') {
+                insights += `<strong>Read This Week:</strong> "Men Are from Mars, Women Are from Venus" - Chapter on Love Languages and Chapter on Stress Responses`;
+            } else if (entry.emotion === 'anxious') {
+                insights += `<strong>Read This Week:</strong> "Surrounded by Idiots" - Chapter on Communication Styles to understand ${person.name}'s type better`;
+            } else {
+                insights += `<strong>Read This Week:</strong> "The Laws of Human Nature" - Chapter 2 (Transform Self-love into Empathy) to deepen your understanding of ${person.name}`;
+            }
+
+            insights += `</div>`;
+
+            return insights;
+        }
+
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            const modal = document.getElementById('person-modal');
+            if (event.target === modal) {
+                closePersonModal();
+            }
+        }
+    </script>
+</body>
+</html>
